@@ -14,6 +14,7 @@ module.exports = {
         libraryName: "element-ui",
         styleLibraryName: "theme-chalk"
       }
-    ]
+    ],
+    "@babel/plugin-proposal-nullish-coalescing-operator"
   ]
 };
