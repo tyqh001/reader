@@ -152,7 +152,10 @@ export default {
           this.$store.getters.config.fontColor ||
           (this.$store.getters.isNight ? "#666" : "#262626"),
         ...this.$store.getters.currentFontFamily,
-        ...(this.$store.getters.config.contentCSS || {})
+        ...(this.$store.getters.config.contentCSS || {}),
+        lineHeight: this.$store.getters.config.lineHeight || 1.85,
+        textRendering: "optimizeLegibility",
+        WebkitFontSmoothing: "antialiased"
       };
     },
     pStyle() {

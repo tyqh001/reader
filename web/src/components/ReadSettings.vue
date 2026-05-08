@@ -476,6 +476,12 @@ export default {
         },
         {
           background: "rgba(255, 255, 255, 0.8)"
+        },
+        {
+          background: "rgba(244, 236, 216, 0.8)"
+        },
+        {
+          background: "rgba(232, 236, 241, 0.8)"
         }
       ],
       builtinBG: [

@@ -1,0 +1,86 @@
+/* Theme variants */
+/* Day theme inherits :root defaults */
+
+[data-theme="night"] {
+  --color-body-bg: #1a1c20;
+  --color-content-bg: #22252a;
+  --color-text-primary: #c8c3b8;
+  --color-text-secondary: #8a857a;
+  --color-text-muted: #5e5a52;
+  --color-accent: #8babd4;
+  --color-accent-light: #a3c4e8;
+  --color-toolbar-bg: rgba(26, 28, 32, 0.92);
+  --color-popover-bg: #22252a;
+  --color-overlay: rgba(0, 0, 0, 0.5);
+  --color-selection-bg: rgba(139, 171, 212, 0.25);
+  --color-divider: rgba(200, 195, 184, 0.08);
+  --color-progress-track: rgba(200, 195, 184, 0.1);
+  --color-progress-fill: var(--color-accent);
+  --color-focus-ring: var(--color-accent);
+}
+
+[data-theme="sepia"] {
+  --color-body-bg: #f4ecd8;
+  --color-content-bg: #faf4e8;
+  --color-text-primary: #3d3226;
+  --color-text-secondary: #6e5e48;
+  --color-text-muted: #9e8a6e;
+  --color-accent: #a0522d;
+  --color-accent-light: #c4714a;
+  --color-toolbar-bg: rgba(244, 236, 216, 0.92);
+  --color-popover-bg: #faf4e8;
+  --color-overlay: rgba(61, 50, 38, 0.25);
+  --color-selection-bg: rgba(160, 82, 45, 0.18);
+  --color-divider: rgba(61, 50, 38, 0.08);
+  --color-progress-track: rgba(61, 50, 38, 0.1);
+  --color-progress-fill: var(--color-accent);
+  --color-focus-ring: var(--color-accent);
+}
+
+[data-theme="cool"] {
+  --color-body-bg: #e8ecf1;
+  --color-content-bg: #f4f6f8;
+  --color-text-primary: #1a2332;
+  --color-text-secondary: #4a5568;
+  --color-text-muted: #7a869a;
+  --color-accent: #2b6cb0;
+  --color-accent-light: #4299e1;
+  --color-toolbar-bg: rgba(232, 236, 241, 0.92);
+  --color-popover-bg: #f4f6f8;
+  --color-overlay: rgba(26, 35, 50, 0.25);
+  --color-selection-bg: rgba(43, 108, 176, 0.18);
+  --color-divider: rgba(26, 35, 50, 0.08);
+  --color-progress-track: rgba(26, 35, 50, 0.1);
+  --color-progress-fill: var(--color-accent);
+  --color-focus-ring: var(--color-accent);
+}
+
+/* Auto-detect system dark preference */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --color-body-bg: #1a1c20;
+    --color-content-bg: #22252a;
+    --color-text-primary: #c8c3b8;
+    --color-text-secondary: #8a857a;
+    --color-text-muted: #5e5a52;
+    --color-accent: #8babd4;
+    --color-accent-light: #a3c4e8;
+    --color-toolbar-bg: rgba(26, 28, 32, 0.92);
+    --color-popover-bg: #22252a;
+    --color-overlay: rgba(0, 0, 0, 0.5);
+    --color-selection-bg: rgba(139, 171, 212, 0.25);
+    --color-divider: rgba(200, 195, 184, 0.08);
+    --color-progress-track: rgba(200, 195, 184, 0.1);
+    --color-progress-fill: var(--color-accent);
+    --color-focus-ring: var(--color-accent);
+  }
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-normal: 0ms;
+    --duration-slow: 0ms;
+  }
+}

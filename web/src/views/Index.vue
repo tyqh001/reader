@@ -26,7 +26,7 @@
           }}</span>
         </div>
         <div class="navigation-sub-title">
-          清风不识字，何故乱翻书
+          春风若有怜花意，可否许我再少年
         </div>
         <div class="search-wrapper">
           <el-input
@@ -398,29 +398,6 @@
               @click="backupToWebdav"
             >
               保存备份
-            </el-tag>
-          </div>
-        </div>
-        <div class="setting-wrapper">
-          <div class="setting-title">
-            其它
-          </div>
-          <div class="setting-item">
-            <el-tag
-              type="info"
-              :effect="isNight ? 'dark' : 'light'"
-              class="setting-btn"
-              @click="showMPCode"
-            >
-              关注公众号【假装大佬】
-            </el-tag>
-            <el-tag
-              type="info"
-              :effect="isNight ? 'dark' : 'light'"
-              class="setting-btn"
-              @click="joinTGChannel"
-            >
-              加入TG频道【假装大佬】
             </el-tag>
           </div>
         </div>
@@ -2744,12 +2721,6 @@ export default {
     },
     showUserManageDialog() {
       eventBus.$emit("showUserManageDialog");
-    },
-    showMPCode() {
-      eventBus.$emit("showMPCodeDialog");
-    },
-    joinTGChannel() {
-      window.open("https://t.me/facker_channel", "_target");
     },
     ensureLoadBookCover() {
       // 手动触发滚动事件，显示书籍封面图片

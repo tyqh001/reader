@@ -130,6 +130,16 @@ const settings = {
       body: "#f7f7f7 repeat",
       content: "#fff repeat",
       popup: "#f7f7f7 repeat"
+    },
+    {
+      body: "#f4ecd8 repeat",
+      content: "#faf4e8 repeat",
+      popup: "#f4ecd8 repeat"
+    },
+    {
+      body: "#e8ecf1 repeat",
+      content: "#f4f6f8 repeat",
+      popup: "#e8ecf1 repeat"
     }
   ],
   fonts: [

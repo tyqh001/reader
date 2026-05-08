@@ -1,0 +1,49 @@
+/* Design tokens for Reader app */
+:root {
+  /* Typography — CJK-optimized font stacks */
+  --font-serif: "reader-st", "Noto Serif CJK SC", "Source Han Serif SC",
+    "Songti SC", "STSong", "宋体", "Song", Georgia, "Times New Roman", serif;
+  --font-sans: "reader-ht", "Noto Sans CJK SC", "Source Han Sans SC",
+    "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "黑体",
+    "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-mono: "SF Mono", "Fira Code", "Fira Mono", "Roboto Mono",
+    "Courier New", monospace;
+
+  /* Reading typography */
+  --reader-font-size: clamp(16px, 1rem + 0.5vw, 22px);
+  --reader-line-height: 1.85;
+  --reader-paragraph-space: 0.8em;
+  --reader-content-width: min(720px, 100vw - 32px);
+
+  /* Spacing scale */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+
+  /* Transitions */
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Day theme (warm parchment) */
+  --color-body-bg: #f5f0e8;
+  --color-content-bg: #faf8f3;
+  --color-text-primary: #2c2416;
+  --color-text-secondary: #6b5e4e;
+  --color-text-muted: #9e8e7a;
+  --color-accent: #8b6914;
+  --color-accent-light: #b8912e;
+  --color-toolbar-bg: rgba(245, 240, 232, 0.92);
+  --color-popover-bg: #faf8f3;
+  --color-overlay: rgba(44, 36, 22, 0.3);
+  --color-selection-bg: rgba(139, 105, 20, 0.2);
+  --color-divider: rgba(44, 36, 22, 0.08);
+  --color-progress-track: rgba(44, 36, 22, 0.1);
+  --color-progress-fill: var(--color-accent);
+  --color-focus-ring: var(--color-accent);
+}
