@@ -134,7 +134,12 @@ class AnalyzeByJSonPath(json: Any) {
     }
 
     internal fun getObject(rule: String): Any {
-        return ctx.read(rule)
+        return try {
+            ctx.read(rule)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            ""
+        }
     }
 
     internal fun getList(rule: String): ArrayList<Any>? {

@@ -1478,11 +1478,20 @@ export default {
       });
     },
     saveBookProgress() {
+      const cacheKey =
+        "bookChapterProgress@" +
+        this.$store.getters.readingBook.name +
+        "_" +
+        this.$store.getters.readingBook.author +
+        "_" +
+        this.chapterIndex;
+      const pos = getCache(cacheKey) || 0;
       return Axios.post(
         this.api + "/saveBookProgress",
         {
           url: this.$store.getters.readingBook.bookUrl,
-          index: this.chapterIndex
+          index: this.chapterIndex,
+          pos: pos
         },
         {
           silent: true
@@ -2589,7 +2598,9 @@ export default {
           "bookChapterProgress@" +
             this.$store.getters.readingBook.name +
             "_" +
-            this.$store.getters.readingBook.author,
+            this.$store.getters.readingBook.author +
+            "_" +
+            this.chapterIndex,
           position
         );
       } catch (error) {
@@ -2604,13 +2615,22 @@ export default {
         if (this.error) {
           return;
         }
-        const lastPosition = getCache(
+        const cacheKey =
           "bookChapterProgress@" +
-            this.$store.getters.readingBook.name +
-            "_" +
-            this.$store.getters.readingBook.author
-        );
-        if (lastPosition && +lastPosition) {
+          this.$store.getters.readingBook.name +
+          "_" +
+          this.$store.getters.readingBook.author +
+          "_" +
+          this.chapterIndex;
+        const lastPosition = getCache(cacheKey);
+        const serverPos = this.$store.getters.readingBook.durChapterPos;
+        if (serverPos && +serverPos > 0) {
+          this.$nextTick(() => {
+            this.showPosition(+serverPos, () => {
+              this.startSavePosition = true;
+            });
+          });
+        } else if (lastPosition && +lastPosition) {
           this.$nextTick(() => {
             this.showPosition(+lastPosition, () => {
               this.startSavePosition = true;

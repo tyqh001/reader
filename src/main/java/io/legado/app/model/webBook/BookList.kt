@@ -158,11 +158,19 @@ object BookList {
         analyzeRule.ruleData = searchBook
         analyzeRule.setContent(item)
         if (log) debugLog?.log(bookSource.bookSourceUrl, "┌获取书名")
-        searchBook.name = BookHelp.formatBookName(analyzeRule.getString(ruleName))
+        try {
+            searchBook.name = BookHelp.formatBookName(analyzeRule.getString(ruleName))
+        } catch (e: Exception) {
+            if (log) debugLog?.log(bookSource.bookSourceUrl, "└${e.localizedMessage}")
+        }
         if (log) debugLog?.log(bookSource.bookSourceUrl, "└${searchBook.name}")
         if (searchBook.name.isNotEmpty()) {
             if (log) debugLog?.log(bookSource.bookSourceUrl, "┌获取作者")
-            searchBook.author = BookHelp.formatBookAuthor(analyzeRule.getString(ruleAuthor))
+            try {
+                searchBook.author = BookHelp.formatBookAuthor(analyzeRule.getString(ruleAuthor))
+            } catch (e: Exception) {
+                if (log) debugLog?.log(bookSource.bookSourceUrl, "└${e.localizedMessage}")
+            }
             if (log) debugLog?.log(bookSource.bookSourceUrl, "└${searchBook.author}")
             if (log) debugLog?.log(bookSource.bookSourceUrl, "┌获取分类")
             try {
@@ -203,7 +211,11 @@ object BookList {
                 if (log) debugLog?.log(bookSource.bookSourceUrl, "└${e.localizedMessage}")
             }
             if (log) debugLog?.log(bookSource.bookSourceUrl, "┌获取详情页链接")
-            searchBook.bookUrl = analyzeRule.getString(ruleBookUrl, isUrl = true)
+            try {
+                searchBook.bookUrl = analyzeRule.getString(ruleBookUrl, isUrl = true)
+            } catch (e: Exception) {
+                if (log) debugLog?.log(bookSource.bookSourceUrl, "└${e.localizedMessage}")
+            }
             if (searchBook.bookUrl.isEmpty()) {
                 searchBook.bookUrl = baseUrl
             }

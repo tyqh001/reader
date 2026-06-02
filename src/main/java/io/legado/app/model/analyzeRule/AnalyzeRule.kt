@@ -654,7 +654,12 @@ class AnalyzeRule(
         bindings["title"] = chapter?.title
         bindings["src"] = content
         bindings["nextChapterUrl"] = nextChapterUrl
-        return SCRIPT_ENGINE.eval(jsStr, bindings)
+        return try {
+            SCRIPT_ENGINE.eval(jsStr, bindings)
+        } catch (e: Exception) {
+            logger.error("JS执行错误: ${e.localizedMessage}", e)
+            null
+        }
     }
 
     override fun getSource(): BaseSource? {

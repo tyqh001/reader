@@ -54,18 +54,26 @@ object BookInfo {
         }
         val mCanReName = canReName && !infoRule.canReName.isNullOrBlank()
         debugLog?.log(bookSource.bookSourceUrl, "┌获取书名")
-        BookHelp.formatBookName(analyzeRule.getString(infoRule.name)).let {
-            if (it.isNotEmpty() && (mCanReName || book.name.isEmpty())) {
-                book.name = it
+        try {
+            BookHelp.formatBookName(analyzeRule.getString(infoRule.name)).let {
+                if (it.isNotEmpty() && (mCanReName || book.name.isEmpty())) {
+                    book.name = it
+                }
+                debugLog?.log(bookSource.bookSourceUrl, "└${it}")
             }
-            debugLog?.log(bookSource.bookSourceUrl, "└${it}")
+        } catch (e: Exception) {
+            debugLog?.log(bookSource.bookSourceUrl, "└${e.localizedMessage}")
         }
         debugLog?.log(bookSource.bookSourceUrl, "┌获取作者")
-        BookHelp.formatBookAuthor(analyzeRule.getString(infoRule.author)).let {
-            if (it.isNotEmpty() && (mCanReName || book.author.isEmpty())) {
-                book.author = it
+        try {
+            BookHelp.formatBookAuthor(analyzeRule.getString(infoRule.author)).let {
+                if (it.isNotEmpty() && (mCanReName || book.author.isEmpty())) {
+                    book.author = it
+                }
+                debugLog?.log(bookSource.bookSourceUrl, "└${it}")
             }
-            debugLog?.log(bookSource.bookSourceUrl, "└${it}")
+        } catch (e: Exception) {
+            debugLog?.log(bookSource.bookSourceUrl, "└${e.localizedMessage}")
         }
         debugLog?.log(bookSource.bookSourceUrl, "┌获取分类")
         try {
@@ -118,7 +126,11 @@ object BookInfo {
             debugLog?.log(bookSource.bookSourceUrl, "└${e.localizedMessage}")
         }
         debugLog?.log(bookSource.bookSourceUrl, "┌获取目录链接")
-        book.tocUrl = analyzeRule.getString(infoRule.tocUrl, isUrl = true)
+        try {
+            book.tocUrl = analyzeRule.getString(infoRule.tocUrl, isUrl = true)
+        } catch (e: Exception) {
+            debugLog?.log(bookSource.bookSourceUrl, "└${e.localizedMessage}")
+        }
         if (book.tocUrl.isEmpty()) book.tocUrl = baseUrl
         if (book.tocUrl == baseUrl) {
             book.tocHtml = body

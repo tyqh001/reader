@@ -154,6 +154,7 @@ export default new Vuex.Store({
               ...state.shelfBooks[i],
               durChapterTime: new Date().getTime(),
               durChapterIndex: readingBook.index,
+              durChapterPos: readingBook.durChapterPos || 0,
               ...(title
                 ? {
                     durChapterTitle: title

@@ -93,7 +93,11 @@ object BookChapterList {
                         }
                     }
                     asyncArray.forEach { coroutine ->
-                        chapterList.addAll(coroutine.await())
+                        try {
+                            chapterList.addAll(coroutine.await())
+                        } catch (e: Exception) {
+                            debugLog?.log(bookSource.bookSourceUrl, "⇒并发目录解析失败: ${e.localizedMessage}")
+                        }
                     }
                 }
             }
@@ -170,32 +174,36 @@ object BookChapterList {
             val upTimeRule = analyzeRule.splitSourceRule(tocRule.updateTime)
             val isVolumeRule = analyzeRule.splitSourceRule(tocRule.isVolume)
             elements.forEachIndexed { index, item ->
-                analyzeRule.setContent(item)
-                val bookChapter = BookChapter(bookUrl = book.bookUrl, baseUrl = redirectUrl)
-                analyzeRule.chapter = bookChapter
-                bookChapter.title = analyzeRule.getString(nameRule)
-                bookChapter.url = analyzeRule.getString(urlRule)
-                bookChapter.tag = analyzeRule.getString(upTimeRule)
-                val isVolume = analyzeRule.getString(isVolumeRule)
-                bookChapter.isVolume = false
-                if (isVolume.isTrue()) {
-                    bookChapter.isVolume = true
-                }
-                if (bookChapter.url.isEmpty()) {
-                    if (bookChapter.isVolume) {
-                        bookChapter.url = bookChapter.title + index
-                        if(log) debugLog?.log(bookSource.bookSourceUrl, "⇒一级目录${index}未获取到url,使用标题替代")
-                    } else {
-                        bookChapter.url = baseUrl
-                        if(log) debugLog?.log(bookSource.bookSourceUrl, "⇒目录${index}未获取到url,使用baseUrl替代")
+                try {
+                    analyzeRule.setContent(item)
+                    val bookChapter = BookChapter(bookUrl = book.bookUrl, baseUrl = redirectUrl)
+                    analyzeRule.chapter = bookChapter
+                    bookChapter.title = analyzeRule.getString(nameRule)
+                    bookChapter.url = analyzeRule.getString(urlRule)
+                    bookChapter.tag = analyzeRule.getString(upTimeRule)
+                    val isVolume = analyzeRule.getString(isVolumeRule)
+                    bookChapter.isVolume = false
+                    if (isVolume.isTrue()) {
+                        bookChapter.isVolume = true
                     }
-                }
-                if (bookChapter.title.isNotEmpty()) {
-                    var isVip = analyzeRule.getString(vipRule)
-                    if (isVip.isTrue()) {
-                        bookChapter.title = "\uD83D\uDD12" + bookChapter.title
+                    if (bookChapter.url.isEmpty()) {
+                        if (bookChapter.isVolume) {
+                            bookChapter.url = bookChapter.title + index
+                            if(log) debugLog?.log(bookSource.bookSourceUrl, "⇒一级目录${index}未获取到url,使用标题替代")
+                        } else {
+                            bookChapter.url = baseUrl
+                            if(log) debugLog?.log(bookSource.bookSourceUrl, "⇒目录${index}未获取到url,使用baseUrl替代")
+                        }
                     }
-                    chapterList.add(bookChapter)
+                    if (bookChapter.title.isNotEmpty()) {
+                        var isVip = analyzeRule.getString(vipRule)
+                        if (isVip.isTrue()) {
+                            bookChapter.title = "\uD83D\uDD12" + bookChapter.title
+                        }
+                        chapterList.add(bookChapter)
+                    }
+                } catch (e: Exception) {
+                    if(log) debugLog?.log(bookSource.bookSourceUrl, "⇒目录${index}解析失败: ${e.localizedMessage}")
                 }
             }
             if(log) debugLog?.log(bookSource.bookSourceUrl, "└目录列表解析完成")

@@ -93,7 +93,11 @@ object BookContent {
                     }
                 }
                 asyncArray.forEach { coroutine ->
-                    content.append("\n").append(coroutine.await())
+                    try {
+                        content.append("\n").append(coroutine.await())
+                    } catch (e: Exception) {
+                        debugLog?.log(bookSource.bookSourceUrl, "⇒并发正文解析失败: ${e.localizedMessage}")
+                    }
                 }
             }
         }
@@ -133,7 +137,12 @@ object BookContent {
         val nextUrlList = arrayListOf<String>()
         analyzeRule.chapter = chapter
         //获取正文
-        var content = analyzeRule.getString(contentRule.content)
+        var content = try {
+            analyzeRule.getString(contentRule.content)
+        } catch (e: Exception) {
+            if(printLog) debugLog?.log(bookSource.bookSourceUrl, "正文解析失败: ${e.localizedMessage}")
+            ""
+        }
         content = HtmlFormatter.formatKeepImg(content, rUrl)
         //获取下一页链接
         val nextUrlRule = contentRule.nextContentUrl
