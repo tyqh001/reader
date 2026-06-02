@@ -10,6 +10,7 @@ buildscript {
     // extra["kotlin_version"] = "1.5.21"
     repositories {
 	    mavenLocal()
+	    maven { url = uri("https://maven.aliyun.com/repository/public") }
         mavenCentral()
     }
     dependencies {
@@ -64,6 +65,7 @@ java {
 }
 
 repositories {
+    maven { url = uri("https://maven.aliyun.com/repository/public") }
     mavenCentral()
     maven("https://jitpack.io")
     maven("https://gitlab.com/api/v4/projects/26729549/packages/maven")
