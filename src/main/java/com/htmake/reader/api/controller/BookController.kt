@@ -848,85 +848,85 @@ class BookController(coroutineContext: CoroutineContext): BaseController(corouti
 
     suspend fun searchBookSource(context: RoutingContext): ReturnData {
         val returnData = ReturnData()
-        if (!checkAuth(context)) {
-            return returnData.setData("NEED_LOGIN").setErrorMsg("请登录后使用")
-        }
-        var bookUrl: String
-        var lastIndex: Int
-        var searchSize: Int
-        var bookSourceGroup: String
-        if (context.request().method() == HttpMethod.POST) {
-            // post 请求
-            bookUrl = context.bodyAsJson.getString("url")
-            lastIndex = context.bodyAsJson.getInteger("lastIndex", -1)
-            searchSize = context.bodyAsJson.getInteger("searchSize", 5)
-            bookSourceGroup = context.bodyAsJson.getString("bookSourceGroup", "")
-        } else {
-            // get 请求
-            bookUrl = context.queryParam("url").firstOrNull() ?: ""
-            lastIndex = context.queryParam("lastIndex").firstOrNull()?.toInt() ?: -1
-            searchSize = context.queryParam("searchSize").firstOrNull()?.toInt() ?: 5
-            bookSourceGroup = context.queryParam("bookSourceGroup").firstOrNull() ?: ""
-        }
-        var userNameSpace = getUserNameSpace(context)
-        var userBookSourceList = loadBookSourceStringList(userNameSpace, bookSourceGroup)
-        if (userBookSourceList.size <= 0) {
-            return returnData.setErrorMsg("未配置书源")
-        }
-        if (bookUrl.isNullOrEmpty()) {
-            return returnData.setErrorMsg("请输入书籍链接")
-        }
-        if (lastIndex >= userBookSourceList.size - 1) {
-            return returnData.setErrorMsg("没有更多了")
-        }
-        var book = getShelfBookByURL(bookUrl, userNameSpace)
-        if (book == null) {
-            book = bookInfoCache.getAsString(bookUrl)?.toMap()?.toDataClass()
-        }
-        if (book == null) {
-            return returnData.setErrorMsg("书籍信息错误")
-        }
-        // 校正 lastIndex
-        var bookSourceList: JsonArray? = asJsonArray(getUserStorage(userNameSpace, book.name + "_" + book.author, "bookSource"))
-        if (bookSourceList != null && bookSourceList.size() > 0) {
-            try {
-                val lastBookSourceUrl = bookSourceList.getJsonObject(bookSourceList.size() - 1).getString("origin")
-                lastIndex = Math.max(lastIndex, getBookSourceBySourceURL(lastBookSourceUrl, userNameSpace, userBookSourceList).second)
-            } catch(e: Exception) {
-                e.printStackTrace()
+        try {
+            if (!checkAuth(context)) {
+                return returnData.setData("NEED_LOGIN").setErrorMsg("请登录后使用")
             }
-        }
-
-        logger.info("searchBookSource from lastIndex: {}", lastIndex)
-        var isEnd = false
-        context.request().connection().closeHandler{
-            logger.info("客户端已断开链接，停止 searchBookSource")
-            isEnd = true
-        }
-        searchSize = if(searchSize > 0) searchSize else 5
-        var resultList = arrayListOf<SearchBook>()
-        var concurrentCount = Math.max(searchSize * 2, 24)
-        limitConcurrent(concurrentCount, lastIndex + 1, userBookSourceList.size, {it->
-            lastIndex = it
-            var bookSource = userBookSourceList.get(it)
-            searchBookWithSource(bookSource, book, userNameSpace = userNameSpace)
-        }) {list, loopCount ->
-            // logger.info("list: {}", list)
-            list.forEach {
-                val bookList = it as? Collection<SearchBook>
-                bookList?.let {
-                    resultList.addAll(it)
+            var bookUrl: String
+            var lastIndex: Int
+            var searchSize: Int
+            var bookSourceGroup: String
+            if (context.request().method() == HttpMethod.POST) {
+                bookUrl = context.bodyAsJson.getString("url")
+                lastIndex = context.bodyAsJson.getInteger("lastIndex", -1)
+                searchSize = context.bodyAsJson.getInteger("searchSize", 5)
+                bookSourceGroup = context.bodyAsJson.getString("bookSourceGroup", "")
+            } else {
+                bookUrl = context.queryParam("url").firstOrNull() ?: ""
+                lastIndex = context.queryParam("lastIndex").firstOrNull()?.toInt() ?: -1
+                searchSize = context.queryParam("searchSize").firstOrNull()?.toInt() ?: 5
+                bookSourceGroup = context.queryParam("bookSourceGroup").firstOrNull() ?: ""
+            }
+            var userNameSpace = getUserNameSpace(context)
+            var userBookSourceList = loadBookSourceStringList(userNameSpace, bookSourceGroup)
+            if (userBookSourceList.size <= 0) {
+                return returnData.setErrorMsg("未配置书源")
+            }
+            if (bookUrl.isNullOrEmpty()) {
+                return returnData.setErrorMsg("请输入书籍链接")
+            }
+            if (lastIndex >= userBookSourceList.size - 1) {
+                return returnData.setErrorMsg("没有更多了")
+            }
+            var book = getShelfBookByURL(bookUrl, userNameSpace)
+            if (book == null) {
+                book = bookInfoCache.getAsString(bookUrl)?.toMap()?.toDataClass()
+            }
+            if (book == null) {
+                return returnData.setErrorMsg("书籍信息错误")
+            }
+            var bookSourceList: JsonArray? = asJsonArray(getUserStorage(userNameSpace, book.name + "_" + book.author, "bookSource"))
+            if (bookSourceList != null && bookSourceList.size() > 0) {
+                try {
+                    val lastBookSourceUrl = bookSourceList.getJsonObject(bookSourceList.size() - 1).getString("origin")
+                    lastIndex = Math.max(lastIndex, getBookSourceBySourceURL(lastBookSourceUrl, userNameSpace, userBookSourceList).second)
+                } catch(e: Exception) {
+                    e.printStackTrace()
                 }
             }
-            if (isEnd || loopCount >= concurrentLoopCount) {
-                // 超过最大轮次，终止执行
-                false
-            } else {
-                resultList.size < searchSize
+
+            logger.info("searchBookSource from lastIndex: {}", lastIndex)
+            var isEnd = false
+            context.request().connection().closeHandler{
+                logger.info("客户端已断开链接，停止 searchBookSource")
+                isEnd = true
             }
+            searchSize = if(searchSize > 0) searchSize else 5
+            var resultList = arrayListOf<SearchBook>()
+            var concurrentCount = Math.max(searchSize * 2, 24)
+            limitConcurrent(concurrentCount, lastIndex + 1, userBookSourceList.size, {it->
+                lastIndex = it
+                var bookSource = userBookSourceList.get(it)
+                searchBookWithSource(bookSource, book, userNameSpace = userNameSpace)
+            }) {list, loopCount ->
+                list.forEach {
+                    val bookList = it as? Collection<SearchBook>
+                    bookList?.let {
+                        resultList.addAll(it)
+                    }
+                }
+                if (isEnd || loopCount >= concurrentLoopCount) {
+                    false
+                } else {
+                    resultList.size < searchSize
+                }
+            }
+            saveBookSources(book, resultList, userNameSpace)
+            return returnData.setData(mapOf("lastIndex" to lastIndex, "list" to resultList))
+        } catch (e: Exception) {
+            logger.error("searchBookSource error", e)
+            return returnData.setErrorMsg("搜索书源失败: ${e.localizedMessage}")
         }
-        saveBookSources(book, resultList, userNameSpace)
-        return returnData.setData(mapOf("lastIndex" to lastIndex, "list" to resultList))
     }
 
     suspend fun searchBookSourceSSE(context: RoutingContext) {
@@ -1084,68 +1084,74 @@ class BookController(coroutineContext: CoroutineContext): BaseController(corouti
 
     suspend fun getAvailableBookSource(context: RoutingContext): ReturnData {
         val returnData = ReturnData()
-        if (!checkAuth(context)) {
-            return returnData.setData("NEED_LOGIN").setErrorMsg("请登录后使用")
-        }
-        var bookUrl: String
-        var refresh: Int = 0
-        if (context.request().method() == HttpMethod.POST) {
-            // post 请求
-            bookUrl = context.bodyAsJson.getString("url")
-            refresh = context.bodyAsJson.getInteger("refresh", 0)
-        } else {
-            // get 请求
-            bookUrl = context.queryParam("url").firstOrNull() ?: ""
-            refresh = context.queryParam("refresh").firstOrNull()?.toInt() ?: 0
-        }
-        if (bookUrl.isNullOrEmpty()) {
-            return returnData.setErrorMsg("请输入书籍链接")
-        }
-        var userNameSpace = getUserNameSpace(context)
-        var book = getShelfBookByURL(bookUrl, userNameSpace)
-        if (book == null) {
-            book = bookInfoCache.getAsString(bookUrl)?.toMap()?.toDataClass()
-        }
-        if (book == null) {
-            return returnData.setErrorMsg("书籍信息错误")
-        }
-        var bookSourceList: JsonArray? = asJsonArray(getUserStorage(userNameSpace, book.name + "_" + book.author, "bookSource"))
-        if (bookSourceList != null && bookSourceList.size() > 0) {
-            if (refresh <= 0) {
-                return returnData.setData(bookSourceList.getList())
+        try {
+            if (!checkAuth(context)) {
+                return returnData.setData("NEED_LOGIN").setErrorMsg("请登录后使用")
             }
+            var bookUrl: String
+            var refresh: Int = 0
+            if (context.request().method() == HttpMethod.POST) {
+                bookUrl = context.bodyAsJson.getString("url")
+                refresh = context.bodyAsJson.getInteger("refresh", 0)
+            } else {
+                bookUrl = context.queryParam("url").firstOrNull() ?: ""
+                refresh = context.queryParam("refresh").firstOrNull()?.toInt() ?: 0
+            }
+            if (bookUrl.isNullOrEmpty()) {
+                return returnData.setErrorMsg("请输入书籍链接")
+            }
+            var userNameSpace = getUserNameSpace(context)
+            var book = getShelfBookByURL(bookUrl, userNameSpace)
+            if (book == null) {
+                book = bookInfoCache.getAsString(bookUrl)?.toMap()?.toDataClass()
+            }
+            if (book == null) {
+                return returnData.setErrorMsg("书籍信息错误")
+            }
+            var bookSourceList: JsonArray? = asJsonArray(getUserStorage(userNameSpace, book.name + "_" + book.author, "bookSource"))
+            if (bookSourceList != null && bookSourceList.size() > 0) {
+                if (refresh <= 0) {
+                    return returnData.setData(bookSourceList.getList())
+                }
 
-            // 刷新源
-            var resultList = arrayListOf<SearchBook>()
-            val concurrentCount = 16
-            val userBookSourceStringList = loadBookSourceStringList(userNameSpace)
-            limitConcurrent(concurrentCount, 0, bookSourceList.size(), {it ->
-                var searchBook = bookSourceList.getJsonObject(it).mapTo(SearchBook::class.java)
-                if (searchBook.origin.equals("loc_book")) {
-                    arrayListOf(searchBook)
-                } else {
-                    var bookSource = getBookSourceStringBySourceURL(searchBook.origin, userNameSpace, userBookSourceStringList)
-                    if (bookSource != null) {
-                        searchBookWithSource(bookSource, book, userNameSpace = userNameSpace)
+                // 刷新源
+                var resultList = arrayListOf<SearchBook>()
+                val concurrentCount = 16
+                val userBookSourceStringList = loadBookSourceStringList(userNameSpace)
+                limitConcurrent(concurrentCount, 0, bookSourceList.size(), {it ->
+                    var oldCached = bookSourceList.getJsonObject(it).mapTo(SearchBook::class.java)
+                    if (oldCached.origin.equals("loc_book")) {
+                        arrayListOf(oldCached)
                     } else {
-                        arrayListOf<SearchBook>()
+                        var bookSource = getBookSourceStringBySourceURL(oldCached.origin, userNameSpace, userBookSourceStringList)
+                        if (bookSource != null) {
+                            val freshResult = searchBookWithSource(bookSource, book, userNameSpace = userNameSpace)
+                            if (freshResult.isNotEmpty()) {
+                                freshResult
+                            } else {
+                                arrayListOf(oldCached)
+                            }
+                        } else {
+                            arrayListOf(oldCached)
+                        }
                     }
-                }
-            }) {list, _->
-                // logger.info("list: {}", list)
-                list.forEach {
-                    val bookList = it as? Collection<SearchBook>
-                    bookList?.let {
-                        resultList.addAll(it)
+                }) {list, _->
+                    list.forEach {
+                        val bookList = it as? Collection<SearchBook>
+                        bookList?.let {
+                            resultList.addAll(it)
+                        }
                     }
+                    true
                 }
-                true
+                saveBookSources(book, resultList, userNameSpace, true)
+                return returnData.setData(resultList)
             }
-            // logger.info("refreshed bookSourceList: {}", resultList)
-            saveBookSources(book, resultList, userNameSpace, true)
-            return returnData.setData(resultList)
+            return returnData.setData(arrayListOf<Int>())
+        } catch (e: Exception) {
+            logger.error("getAvailableBookSource error", e)
+            return returnData.setErrorMsg("获取书源失败: ${e.localizedMessage}")
         }
-        return returnData.setData(arrayListOf<Int>())
     }
 
     suspend fun getBookshelf(context: RoutingContext): ReturnData {
